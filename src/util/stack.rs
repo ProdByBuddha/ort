@@ -9,18 +9,14 @@ use smallvec::SmallVec;
 
 use crate::Result;
 
-// maximum number of session inputs to store on stack (~32 bytes per, + 16 bytes for run_async)
-pub(crate) const STACK_SESSION_INPUTS: usize = 6;
-// maximum number of session inputs to store on stack (~40 bytes per, + 16 bytes for run_async)
-pub(crate) const STACK_SESSION_OUTPUTS: usize = 4;
-// maximum number of EPs to store on stack in both session options and environment (24 bytes per)
-pub(crate) const STACK_EXECUTION_PROVIDERS: usize = 6;
-// maximum size of a single string to use stack instead of allocation in with_cstr
-const STACK_CSTR_MAX: usize = 64;
-// maximum size of all strings in an array to use stack instead of allocation in with_cstr_ptr_array
-const STACK_CSTR_ARRAY_MAX_TOTAL: usize = 768;
-// maximum number of string ptrs to keep on stack (16 bytes per)
-const STACK_CSTR_ARRAY_MAX_ELEMENTS: usize = 12;
+// Increased stack thresholds for Darwin stability with many inputs/outputs
+pub(crate) const STACK_SESSION_INPUTS: usize = 128;
+pub(crate) const STACK_SESSION_OUTPUTS: usize = 128;
+pub(crate) const STACK_EXECUTION_PROVIDERS: usize = 32;
+
+const STACK_CSTR_MAX: usize = 128;
+const STACK_CSTR_ARRAY_MAX_TOTAL: usize = 1024;
+const STACK_CSTR_ARRAY_MAX_ELEMENTS: usize = 128;
 
 #[inline]
 pub(crate) fn with_cstr<T>(bytes: &[u8], f: &dyn Fn(&CStr) -> Result<T>) -> Result<T> {
@@ -55,10 +51,10 @@ where
 	T: AsRef<str>
 {
 	fn run_with_heap_cstr_array<T: AsRef<str>, R>(strings: &[T], f: &dyn Fn(&[*const c_char]) -> Result<R>) -> Result<R> {
-		let strings: SmallVec<[*const c_char; STACK_CSTR_ARRAY_MAX_ELEMENTS]> = strings
+		let strings: Vec<*const c_char> = strings
 			.iter()
 			.map(|s| CString::new(s.as_ref()).map(|s| s.into_raw().cast_const()))
-			.collect::<Result<SmallVec<[*const c_char; STACK_CSTR_ARRAY_MAX_ELEMENTS]>, NulError>>()?;
+			.collect::<Result<Vec<*const c_char>, NulError>>()?;
 		let res = f(&strings);
 		for string in strings {
 			drop(unsafe { CString::from_raw(string.cast_mut()) });
@@ -89,7 +85,7 @@ where
 	}
 
 	let total_bytes = strings.iter().fold(0, |acc, s| acc + s.as_ref().len() + 1);
-	if total_bytes < STACK_CSTR_ARRAY_MAX_TOTAL {
+	if total_bytes < STACK_CSTR_ARRAY_MAX_TOTAL && strings.len() < STACK_CSTR_ARRAY_MAX_ELEMENTS {
 		run_with_stack_cstr_array(strings, f)
 	} else {
 		run_with_heap_cstr_array(strings, f)

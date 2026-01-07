@@ -289,6 +289,21 @@ mod tests {
 	}
 
 	#[test]
+	fn test_with_cstr_arr_spill() {
+		let s = "abcdefghijklmnopqrst";
+		let strings = vec![s; 49];
+		with_cstr_ptr_array(&strings, &|arr| {
+			assert_eq!(arr.len(), 49);
+			for &ptr in arr {
+				let cstr = unsafe { CStr::from_ptr(ptr) };
+				assert_eq!(cstr.to_string_lossy(), s);
+			}
+			Ok(())
+		})
+		.unwrap();
+	}
+
+	#[test]
 	fn test_mini_map() {
 		let mut map = MiniMap::<&'static str, u32>::new();
 		map.insert("meaning", 42);

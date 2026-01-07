@@ -47,6 +47,8 @@ pub mod rocm;
 pub use self::rocm::ROCm;
 pub mod cann;
 pub use self::cann::CANN;
+pub mod mps;
+pub use self::mps::MPS;
 pub mod directml;
 pub use self::directml::DirectML;
 pub mod tvm;

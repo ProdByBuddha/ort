@@ -1,0 +1,26 @@
+[package]
+publish = false
+name = "example-chatterbox"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+ort = { path = "../../", features = [ "fetch-models", "ndarray" ] }
+tokenizers = { version = "0.21", default-features = false, features = [ "onig" ] }
+ndarray = "0.17"
+safetensors = "0.5"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = [ "env-filter", "fmt" ] }
+rand = "0.8"
+ndarray-rand = "0.15"
+rustfft = "6.2"
+rodio = "0.20"
+
+[features]
+mps = [ "ort/mps" ]
+coreml = [ "ort/coreml" ]
+
+[[example]]
+name = "chatterbox"
+path = "chatterbox.rs"

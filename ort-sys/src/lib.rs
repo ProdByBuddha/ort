@@ -1115,6 +1115,8 @@ pub struct OrtApi {
 		unsafe extern "system" fn(options: *mut OrtSessionOptions, rocm_options: *const OrtROCMProviderOptions) -> OrtStatusPtr,
 	pub SessionOptionsAppendExecutionProvider_OpenVINO:
 		unsafe extern "system" fn(options: *mut OrtSessionOptions, provider_options: *const OrtOpenVINOProviderOptions) -> OrtStatusPtr,
+	pub SessionOptionsAppendExecutionProvider_MPS:
+		unsafe extern "system" fn(options: *mut OrtSessionOptions, mps_flags: u32) -> OrtStatusPtr,
 	pub SetGlobalDenormalAsZero: unsafe extern "system" fn(tp_options: *mut OrtThreadingOptions) -> OrtStatusPtr,
 	pub CreateArenaCfg: unsafe extern "system" fn(
 		max_mem: usize,

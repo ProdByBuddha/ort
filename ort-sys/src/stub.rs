@@ -843,6 +843,10 @@ unsafe extern "system" fn SessionOptionsAppendExecutionProvider_OpenVINO(
 	Error::new_sys(OrtErrorCode::ORT_NOT_IMPLEMENTED, "Unimplemented")
 }
 
+unsafe extern "system" fn SessionOptionsAppendExecutionProvider_MPS(options: *mut OrtSessionOptions, mps_flags: u32) -> OrtStatusPtr {
+	Error::new_sys(OrtErrorCode::ORT_NOT_IMPLEMENTED, "Unimplemented")
+}
+
 unsafe extern "system" fn SetGlobalDenormalAsZero(tp_options: *mut OrtThreadingOptions) -> OrtStatusPtr {
 	Error::new_sys(OrtErrorCode::ORT_NOT_IMPLEMENTED, "Unimplemented")
 }
@@ -2021,6 +2025,7 @@ pub const fn api() -> OrtApi {
 		SessionOptionsAppendExecutionProvider_CUDA,
 		SessionOptionsAppendExecutionProvider_ROCM,
 		SessionOptionsAppendExecutionProvider_OpenVINO,
+		SessionOptionsAppendExecutionProvider_MPS,
 		SetGlobalDenormalAsZero,
 		CreateArenaCfg,
 		ReleaseArenaCfg,
